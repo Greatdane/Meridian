@@ -24,6 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindow: NSWindow?
     private var cancellables: Set<AnyCancellable> = []
     private var timer: Timer?
+    private var popoverTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         configureStatusItem()
@@ -41,6 +42,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         timer?.invalidate()
+        popoverTimer?.invalidate()
     }
 
     private func configureStatusItem() {
@@ -59,6 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func configurePopover() {
         popover.behavior = .transient
         popover.animates = false
+        popover.delegate = self
         popover.contentSize = NSSize(width: model.popoverWidth, height: model.popoverHeight)
         popover.contentViewController = NSHostingController(rootView: PopoverView(model: model) { [weak self] in
             self?.showSettingsWindow()
@@ -114,10 +117,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             popover.performClose(sender)
         } else {
             model.tick()
+            startPopoverTimer()
             popover.contentSize = NSSize(width: model.popoverWidth, height: model.popoverHeight)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             NSApplication.shared.activate(ignoringOtherApps: true)
         }
+    }
+
+    private func startPopoverTimer() {
+        popoverTimer?.invalidate()
+        let refreshTimer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.model.tick()
+            }
+        }
+        popoverTimer = refreshTimer
+        RunLoop.main.add(refreshTimer, forMode: .common)
+    }
+
+    private func stopPopoverTimer() {
+        popoverTimer?.invalidate()
+        popoverTimer = nil
     }
 
     private func showSettingsWindow() {
@@ -143,5 +163,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+}
+
+extension AppDelegate: NSPopoverDelegate {
+    nonisolated func popoverDidClose(_ notification: Notification) {
+        Task { @MainActor in
+            self.stopPopoverTimer()
+        }
     }
 }
