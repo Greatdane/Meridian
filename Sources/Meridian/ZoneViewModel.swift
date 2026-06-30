@@ -50,6 +50,12 @@ final class ZoneViewModel: ObservableObject {
         }
     }
 
+    @Published var displaySize: DisplaySize {
+        didSet {
+            save()
+        }
+    }
+
     @Published var timeFormat: ClockTimeFormat {
         didSet {
             save()
@@ -113,6 +119,7 @@ final class ZoneViewModel: ObservableObject {
             self.showMenuBarZoneFlag = payload.showMenuBarZoneFlag
             self.showMenuBarZoneName = payload.showMenuBarZoneName
             self.appearance = payload.appearance
+            self.displaySize = payload.displaySize
             self.timeFormat = payload.timeFormat
             self.showLocalTime = payload.showLocalTime
             self.localTimeZoneIdentifier = payload.localTimeZoneIdentifier ?? TimeZone.autoupdatingCurrent.identifier
@@ -125,6 +132,7 @@ final class ZoneViewModel: ObservableObject {
             self.showMenuBarZoneFlag = false
             self.showMenuBarZoneName = false
             self.appearance = .system
+            self.displaySize = .standard
             self.timeFormat = .twentyFourHour
             self.showLocalTime = true
             self.localTimeZoneIdentifier = TimeZone.autoupdatingCurrent.identifier
@@ -221,9 +229,10 @@ final class ZoneViewModel: ObservableObject {
     }
 
     var popoverHeight: CGFloat {
-        let rowHeight = CGFloat(max(visiblePopoverRowCount, 1)) * 79
-        let taggedRowHeight = CGFloat(visibleEntries.filter { !$0.tagIDs.isEmpty }.count) * 20
-        return min(max(rowHeight + taggedRowHeight + 145, 316), 660)
+        let scale = CGFloat(displaySize.scale)
+        let rowHeight = CGFloat(max(visiblePopoverRowCount, 1)) * 79 * scale
+        let taggedRowHeight = CGFloat(visibleEntries.filter { !$0.tagIDs.isEmpty }.count) * 22 * scale
+        return min(max(rowHeight + taggedRowHeight + 145, 316), 700)
     }
 
     var timeSortTitle: String {
@@ -531,6 +540,7 @@ final class ZoneViewModel: ObservableObject {
             showMenuBarZoneFlag: showMenuBarZoneFlag,
             showMenuBarZoneName: showMenuBarZoneName,
             appearance: appearance,
+            displaySize: displaySize,
             timeFormat: timeFormat,
             showLocalTime: showLocalTime,
             localTimeZoneIdentifier: localTimeZoneIdentifier,

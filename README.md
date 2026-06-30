@@ -24,6 +24,7 @@ It is built as a native SwiftUI/AppKit utility. Meridian lives in the menu bar, 
 - Choose menu bar display: icon only or selected zone time.
 - Optional selected-zone flag and compact place abbreviation in the menu bar.
 - 24-hour or AM/PM time format.
+- Small, default, or large display sizing with a live preview.
 - Light, dark, or system appearance.
 - Optional launch at login.
 

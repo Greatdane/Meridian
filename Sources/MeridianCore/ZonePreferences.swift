@@ -89,6 +89,34 @@ public enum ClockTimeFormat: String, CaseIterable, Codable, Sendable {
     }
 }
 
+public enum DisplaySize: String, CaseIterable, Codable, Sendable {
+    case compact
+    case standard
+    case large
+
+    public var title: String {
+        switch self {
+        case .compact:
+            return "Small"
+        case .standard:
+            return "Default"
+        case .large:
+            return "Large"
+        }
+    }
+
+    public var scale: Double {
+        switch self {
+        case .compact:
+            return 0.94
+        case .standard:
+            return 1.0
+        case .large:
+            return 1.10
+        }
+    }
+}
+
 public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
     public var entries: [TimeZoneEntry]
     public var tags: [ZoneTag]
@@ -97,6 +125,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
     public var showMenuBarZoneFlag: Bool
     public var showMenuBarZoneName: Bool
     public var appearance: AppAppearance
+    public var displaySize: DisplaySize
     public var timeFormat: ClockTimeFormat
     public var showLocalTime: Bool
     public var localTimeZoneIdentifier: String?
@@ -110,6 +139,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
         showMenuBarZoneFlag: Bool = false,
         showMenuBarZoneName: Bool = false,
         appearance: AppAppearance = .system,
+        displaySize: DisplaySize = .standard,
         timeFormat: ClockTimeFormat = .twentyFourHour,
         showLocalTime: Bool = true,
         localTimeZoneIdentifier: String? = nil,
@@ -122,6 +152,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
         self.showMenuBarZoneFlag = showMenuBarZoneFlag
         self.showMenuBarZoneName = showMenuBarZoneName
         self.appearance = appearance
+        self.displaySize = displaySize
         self.timeFormat = timeFormat
         self.showLocalTime = showLocalTime
         self.localTimeZoneIdentifier = localTimeZoneIdentifier
@@ -136,6 +167,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
         case showMenuBarZoneFlag
         case showMenuBarZoneName
         case appearance
+        case displaySize
         case timeFormat
         case showLocalTime
         case localTimeZoneIdentifier
@@ -152,6 +184,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
         self.showMenuBarZoneFlag = try container.decodeIfPresent(Bool.self, forKey: .showMenuBarZoneFlag) ?? false
         self.showMenuBarZoneName = try container.decodeIfPresent(Bool.self, forKey: .showMenuBarZoneName) ?? false
         self.appearance = try container.decodeIfPresent(AppAppearance.self, forKey: .appearance) ?? .system
+        self.displaySize = try container.decodeIfPresent(DisplaySize.self, forKey: .displaySize) ?? .standard
         self.timeFormat = try container.decodeIfPresent(ClockTimeFormat.self, forKey: .timeFormat) ?? .twentyFourHour
         self.showLocalTime = try container.decodeIfPresent(Bool.self, forKey: .showLocalTime) ?? true
         self.localTimeZoneIdentifier = try container.decodeIfPresent(String.self, forKey: .localTimeZoneIdentifier)

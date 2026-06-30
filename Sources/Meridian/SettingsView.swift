@@ -287,6 +287,21 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                 }
 
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Display Size")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+
+                    Picker("Display Size", selection: $model.displaySize) {
+                        ForEach(DisplaySize.allCases, id: \.self) { size in
+                            Text(size.title).tag(size)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 280)
+
+                    DisplaySizePreview(size: model.displaySize)
+                }
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Time Format")
                         .font(.system(size: 17, weight: .semibold, design: .rounded))
@@ -552,6 +567,59 @@ private struct TagEditorRow: View {
             get: { currentTag.colorHex },
             set: { model.updateTag(tag, name: currentTag.name, colorHex: $0) }
         )
+    }
+}
+
+private struct DisplaySizePreview: View {
+    let size: DisplaySize
+
+    private var scale: Double {
+        size.scale
+    }
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 11 * scale) {
+            VStack(alignment: .leading, spacing: 5 * scale) {
+                HStack(spacing: 7 * scale) {
+                    Text("🇬🇧")
+                        .font(.system(size: 17 * scale))
+                        .frame(width: 23 * scale, alignment: .center)
+
+                    Text("London")
+                        .font(.system(size: 19 * scale, weight: .semibold, design: .rounded))
+
+                    TagChipView(
+                        tag: ZoneTag(name: "Team", colorHex: "#0A84FF"),
+                        compact: true,
+                        scale: scale
+                    )
+                }
+
+                HStack(spacing: 7 * scale) {
+                    Text("Today")
+                    Text("UTC+1")
+                }
+                .font(.system(size: 11.5 * scale, weight: .medium, design: .rounded))
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text("09:30")
+                .font(.system(size: 26.5 * scale, weight: .semibold, design: .rounded))
+                .monospacedDigit()
+        }
+        .padding(.vertical, 9 * scale)
+        .padding(.horizontal, 11 * scale)
+        .frame(width: 340)
+        .background {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.primary.opacity(0.045))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                }
+        }
     }
 }
 

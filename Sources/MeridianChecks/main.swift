@@ -177,6 +177,7 @@ func checkFormattingAndPreferences() throws {
             showMenuBarZoneFlag: true,
             showMenuBarZoneName: true,
             appearance: .light,
+            displaySize: .large,
             timeFormat: .twelveHour,
             showLocalTime: true,
             localTimeZoneIdentifier: "Asia/Tokyo",
@@ -192,6 +193,7 @@ func checkFormattingAndPreferences() throws {
     try expect(oldPayload.menuBarIcon, .globe, "old payload icon default")
     try expect(oldPayload.showMenuBarZoneName, false, "old payload menu bar name default")
     try expect(oldPayload.appearance, .system, "old payload appearance default")
+    try expect(oldPayload.displaySize, .standard, "old payload display size default")
     try expect(oldPayload.timeFormat, .twentyFourHour, "old payload time format default")
     try expect(oldPayload.tags, [], "old payload tags default")
     try expect(oldPayload.showUTCOffset, true, "old payload UTC offset default")
@@ -210,6 +212,7 @@ func checkFormattingAndPreferences() throws {
     let freshPayload = ZonePreferencesPayload()
     try expect(freshPayload.menuBarMode, .iconOnly, "fresh install menu bar mode")
     try expect(freshPayload.menuBarIcon, .globe, "fresh install menu bar icon")
+    try expect(freshPayload.displaySize, .standard, "fresh install display size")
 }
 
 let checks: [(String, () throws -> Void)] = [

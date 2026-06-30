@@ -31,6 +31,7 @@ open -n dist/Meridian.app
 - Keep reusable date/time behavior in `MeridianCore` where it can be checked by `MeridianChecks`.
 - Store tag definitions separately from time zone entries; entries should reference tags by ID.
 - Menu bar icon mode should default to the globe icon on fresh install.
+- Display size is a persisted appearance preference; row typography should scale from `DisplaySize`.
 - Slider movement should snap displayed local time to real 5-minute clock boundaries.
 - Manual drag ordering should remain available; time sorting is a convenience mode and can be toggled.
 - Use SF Symbols/template images for menu bar icons so macOS handles tinting correctly.

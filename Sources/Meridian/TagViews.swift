@@ -17,14 +17,15 @@ enum TagPalette {
 struct TagChipView: View {
     let tag: ZoneTag
     var compact = false
+    var scale = 1.0
 
     var body: some View {
         Text(tag.name)
-            .font(.system(size: compact ? 9.5 : 11, weight: .semibold, design: .rounded))
+            .font(.system(size: (compact ? 10.75 : 12) * scale, weight: .semibold, design: .rounded))
             .lineLimit(1)
             .foregroundStyle(Color(hex: tag.colorHex).accessibleTextColor)
-            .padding(.horizontal, compact ? 6 : 8)
-            .padding(.vertical, compact ? 2.5 : 4)
+            .padding(.horizontal, (compact ? 7 : 8.5) * scale)
+            .padding(.vertical, (compact ? 3 : 4) * scale)
             .background {
                 Capsule()
                     .fill(Color(hex: tag.colorHex))
