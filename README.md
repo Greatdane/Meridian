@@ -8,6 +8,8 @@ It is built as a native SwiftUI/AppKit utility. Meridian lives in the menu bar, 
 
 - Native macOS menu bar app.
 - Add time zones by city, country, region, or `UTC`.
+- Add colored tags for people, teams, events, or other reminders.
+- Assign multiple tags to each saved time zone.
 - Configure a local reference timezone, shown separately at the top.
 - Hide or show the local row.
 - Show UTC offsets per row.
@@ -18,6 +20,7 @@ It is built as a native SwiftUI/AppKit utility. Meridian lives in the menu bar, 
 - Reorder locations from the popover or settings.
 - Sort locations by displayed time, ascending or descending.
 - Customize zone names and emoji.
+- Manage tag names and colors in Settings.
 - Choose menu bar display: icon only or selected zone time.
 - Optional selected-zone flag and compact place abbreviation in the menu bar.
 - 24-hour or AM/PM time format.

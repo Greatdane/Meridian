@@ -11,6 +11,8 @@ struct SettingsView: View {
     @State private var isShowingLocalPicker = false
     @State private var editingEntry: TimeZoneEntry?
     @State private var draggedEntryID: UUID?
+    @State private var newTagName = ""
+    @State private var newTagColor = TagPalette.colors[0]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -22,6 +24,8 @@ struct SettingsView: View {
             switch selectedTab {
             case .timezones:
                 timezonesPane
+            case .tags:
+                tagsPane
             case .general:
                 generalPane
             case .appearance:
@@ -190,6 +194,84 @@ struct SettingsView: View {
         }
     }
 
+    private var tagsPane: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Manage Tags")
+                        .font(.system(size: 19, weight: .semibold, design: .rounded))
+
+                    HStack(spacing: 12) {
+                        TextField("Tag name", text: $newTagName)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 190)
+                            .onSubmit(addTag)
+
+                        TagColorSwatches(selection: $newTagColor)
+
+                        Spacer()
+
+                        Button {
+                            addTag()
+                        } label: {
+                            Label("Add Tag", systemImage: "plus")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(newTagName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+
+                if model.tags.isEmpty {
+                    Text("Create tags for people, teams, events, or anything else you want to see on time zone cards.")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(14)
+                        .background {
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.primary.opacity(0.045))
+                        }
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(model.tags) { tag in
+                            TagEditorRow(model: model, tag: tag)
+
+                            if tag.id != model.tags.last?.id {
+                                Divider()
+                                    .opacity(0.25)
+                            }
+                        }
+                    }
+                    .background {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.primary.opacity(0.045))
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Assign Tags")
+                        .font(.system(size: 17, weight: .semibold, design: .rounded))
+
+                    VStack(spacing: 0) {
+                        ForEach(model.entries) { entry in
+                            TagAssignmentRow(model: model, entry: entry)
+
+                            if entry.id != model.entries.last?.id {
+                                Divider()
+                                    .opacity(0.25)
+                            }
+                        }
+                    }
+                    .background {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.primary.opacity(0.045))
+                    }
+                }
+            }
+            .padding(24)
+        }
+    }
+
     private var appearancePane: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
@@ -338,6 +420,13 @@ struct SettingsView: View {
     private func label(for entry: TimeZoneEntry) -> String {
         model.entryName(entry)
     }
+
+    private func addTag() {
+        guard model.addTag(name: newTagName, colorHex: newTagColor) != nil else {
+            return
+        }
+        newTagName = ""
+    }
 }
 
 private struct SettingsZoneRow: View {
@@ -367,6 +456,14 @@ private struct SettingsZoneRow: View {
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+
+                if !model.tags(for: entry).isEmpty {
+                    HStack(spacing: 5) {
+                        ForEach(model.tags(for: entry).prefix(4)) { tag in
+                            TagChipView(tag: tag, compact: true)
+                        }
+                    }
+                }
             }
 
             Spacer()
@@ -408,6 +505,110 @@ private struct SettingsZoneRow: View {
     }
 }
 
+private struct TagEditorRow: View {
+    @ObservedObject var model: ZoneViewModel
+    let tag: ZoneTag
+
+    var body: some View {
+        HStack(spacing: 12) {
+            TagChipView(tag: currentTag)
+                .frame(minWidth: 72, alignment: .leading)
+
+            TextField("Name", text: nameBinding)
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 180)
+
+            TagColorSwatches(selection: colorBinding)
+
+            Spacer()
+
+            Button(role: .destructive) {
+                model.removeTag(tag)
+            } label: {
+                Image(systemName: "minus.circle")
+                    .frame(width: 18, height: 18)
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.red)
+            .help("Remove tag")
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+    }
+
+    private var currentTag: ZoneTag {
+        model.tags.first { $0.id == tag.id } ?? tag
+    }
+
+    private var nameBinding: Binding<String> {
+        Binding(
+            get: { currentTag.name },
+            set: { model.updateTag(tag, name: $0, colorHex: currentTag.colorHex) }
+        )
+    }
+
+    private var colorBinding: Binding<String> {
+        Binding(
+            get: { currentTag.colorHex },
+            set: { model.updateTag(tag, name: currentTag.name, colorHex: $0) }
+        )
+    }
+}
+
+private struct TagAssignmentRow: View {
+    @ObservedObject var model: ZoneViewModel
+    let entry: TimeZoneEntry
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text(model.entryEmoji(entry))
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.entryName(entry))
+                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                Text(entry.timeZoneIdentifier)
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(width: 170, alignment: .leading)
+
+            if model.tags.isEmpty {
+                Text("Create a tag first")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(.secondary)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(model.tags) { tag in
+                            Button {
+                                model.toggleTag(tag, for: entry)
+                            } label: {
+                                TagChipView(tag: tag, compact: true)
+                                    .opacity(model.isTag(tag, assignedTo: entry) ? 1 : 0.32)
+                                    .overlay {
+                                        Capsule()
+                                            .stroke(
+                                                model.isTag(tag, assignedTo: entry) ? Color.clear : Color.primary.opacity(0.24),
+                                                lineWidth: 1
+                                            )
+                                    }
+                            }
+                            .buttonStyle(.plain)
+                            .help(model.isTag(tag, assignedTo: entry) ? "Remove \(tag.name)" : "Add \(tag.name)")
+                        }
+                    }
+                    .padding(.vertical, 1)
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+    }
+}
+
 private struct ZoneDropDelegate: DropDelegate {
     let targetEntry: TimeZoneEntry
     @ObservedObject var model: ZoneViewModel
@@ -440,6 +641,7 @@ private struct ZoneDropDelegate: DropDelegate {
 
 private enum SettingsTab: CaseIterable {
     case timezones
+    case tags
     case general
     case appearance
 
@@ -447,6 +649,8 @@ private enum SettingsTab: CaseIterable {
         switch self {
         case .timezones:
             return "Timezones"
+        case .tags:
+            return "Tags"
         case .general:
             return "General"
         case .appearance:
@@ -458,6 +662,8 @@ private enum SettingsTab: CaseIterable {
         switch self {
         case .timezones:
             return "clock"
+        case .tags:
+            return "tag"
         case .general:
             return "gearshape"
         case .appearance:

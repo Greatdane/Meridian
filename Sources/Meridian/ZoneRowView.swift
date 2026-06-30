@@ -10,6 +10,7 @@ struct ZoneRowView: View {
 
     var body: some View {
         let display = model.display(for: entry)
+        let tags = model.tags(for: entry)
 
         HStack(alignment: .center, spacing: 11) {
             VStack(alignment: .leading, spacing: 5) {
@@ -32,6 +33,20 @@ struct ZoneRowView: View {
                 }
                 .font(.system(size: 11.5, weight: .medium, design: .rounded))
                 .foregroundStyle(.secondary)
+
+                if !tags.isEmpty {
+                    HStack(spacing: 5) {
+                        ForEach(tags.prefix(3)) { tag in
+                            TagChipView(tag: tag, compact: true)
+                        }
+
+                        if tags.count > 3 {
+                            Text("+\(tags.count - 3)")
+                                .font(.system(size: 9.5, weight: .semibold, design: .rounded))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
 
             Spacer(minLength: 8)

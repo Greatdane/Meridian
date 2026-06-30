@@ -2,7 +2,7 @@
 
 ## Technical Summary
 
-Meridian is a native macOS menu bar application for tracking world clocks. It is built with Swift Package Manager, SwiftUI, and AppKit. The app runs as an `LSUIElement` accessory app, places a configurable status item in the macOS menu bar, and opens an `NSPopover` containing local time, saved time zones, a 5-minute snapping time scrubber, and quick actions.
+Meridian is a native macOS menu bar application for tracking world clocks. It is built with Swift Package Manager, SwiftUI, and AppKit. The app runs as an `LSUIElement` accessory app, places a configurable status item in the macOS menu bar, and opens an `NSPopover` containing local time, saved time zones, colored tags, a 5-minute snapping time scrubber, and quick actions.
 
 The core product goal is a small, fast, low-friction alternative to heavier world-clock apps. Meridian should feel like a native macOS utility: quiet visuals, compact controls, predictable settings, and no unnecessary onboarding or marketing surfaces.
 
@@ -29,6 +29,7 @@ open -n dist/Meridian.app
 
 - Keep preferences backward compatible by using optional decode defaults in `ZonePreferencesPayload`.
 - Keep reusable date/time behavior in `MeridianCore` where it can be checked by `MeridianChecks`.
+- Store tag definitions separately from time zone entries; entries should reference tags by ID.
 - Menu bar icon mode should default to the globe icon on fresh install.
 - Slider movement should snap displayed local time to real 5-minute clock boundaries.
 - Manual drag ordering should remain available; time sorting is a convenience mode and can be toggled.

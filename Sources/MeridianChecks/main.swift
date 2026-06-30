@@ -157,6 +157,7 @@ func checkFormattingAndPreferences() throws {
     try expect(TimeZoneNameAbbreviator.abbreviation(for: "Los Angeles"), "L.A.", "Los Angeles abbreviation")
     try expect(TimeZoneNameAbbreviator.abbreviation(for: "London"), "LON", "London abbreviation")
 
+    let tagID = UUID(uuidString: "E7749458-B1EA-47DD-8911-75E7FB76F816")!
         let payload = ZonePreferencesPayload(
             entries: [
                 TimeZoneEntry(
@@ -164,8 +165,12 @@ func checkFormattingAndPreferences() throws {
                 timeZoneIdentifier: "Europe/London",
                 displayName: "Team",
                 emoji: TimeZoneCatalog.flagEmoji(for: "GB"),
-                showInMenuBar: true
+                showInMenuBar: true,
+                tagIDs: [tagID]
             )
+            ],
+            tags: [
+                ZoneTag(id: tagID, name: "Engineering", colorHex: "#0A84FF")
             ],
             menuBarMode: .zoneTime,
             menuBarIcon: .clock,
@@ -188,9 +193,16 @@ func checkFormattingAndPreferences() throws {
     try expect(oldPayload.showMenuBarZoneName, false, "old payload menu bar name default")
     try expect(oldPayload.appearance, .system, "old payload appearance default")
     try expect(oldPayload.timeFormat, .twentyFourHour, "old payload time format default")
+    try expect(oldPayload.tags, [], "old payload tags default")
     try expect(oldPayload.showUTCOffset, true, "old payload UTC offset default")
     try expect(MenuBarMode.allCases, [.iconOnly, .zoneTime], "menu bar display choices")
     try expect(MenuBarIcon.clock.systemSymbolName, "clock.fill", "clock icon should use filled symbol")
+
+    let oldEntryPayload = try ZonePreferencesCoding.decode(
+        #"{"entries":[{"id":"8DF9746D-143D-41C9-BF8B-8D093F3F0026","timeZoneIdentifier":"Europe/London","displayName":"London","emoji":"🇬🇧","showInMenuBar":true}]}"#
+            .data(using: .utf8)!
+    )
+    try expect(oldEntryPayload.entries.first?.tagIDs, [], "old entries tag IDs default")
 
     let oldLocalPayload = try ZonePreferencesCoding.decode(#"{"entries":[],"menuBarMode":"localTime"}"#.data(using: .utf8)!)
     try expect(oldLocalPayload.menuBarMode, .iconOnly, "old local menu bar mode is hidden")

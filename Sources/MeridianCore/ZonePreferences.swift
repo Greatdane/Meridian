@@ -91,6 +91,7 @@ public enum ClockTimeFormat: String, CaseIterable, Codable, Sendable {
 
 public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
     public var entries: [TimeZoneEntry]
+    public var tags: [ZoneTag]
     public var menuBarMode: MenuBarMode
     public var menuBarIcon: MenuBarIcon
     public var showMenuBarZoneFlag: Bool
@@ -103,6 +104,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
 
     public init(
         entries: [TimeZoneEntry] = DefaultZones.entries,
+        tags: [ZoneTag] = [],
         menuBarMode: MenuBarMode = .iconOnly,
         menuBarIcon: MenuBarIcon = .globe,
         showMenuBarZoneFlag: Bool = false,
@@ -114,6 +116,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
         showUTCOffset: Bool = true
     ) {
         self.entries = entries
+        self.tags = tags
         self.menuBarMode = menuBarMode == .localTime ? .iconOnly : menuBarMode
         self.menuBarIcon = menuBarIcon
         self.showMenuBarZoneFlag = showMenuBarZoneFlag
@@ -127,6 +130,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case entries
+        case tags
         case menuBarMode
         case menuBarIcon
         case showMenuBarZoneFlag
@@ -141,6 +145,7 @@ public struct ZonePreferencesPayload: Codable, Equatable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.entries = try container.decodeIfPresent([TimeZoneEntry].self, forKey: .entries) ?? DefaultZones.entries
+        self.tags = try container.decodeIfPresent([ZoneTag].self, forKey: .tags) ?? []
         let decodedMenuBarMode = (try? container.decodeIfPresent(MenuBarMode.self, forKey: .menuBarMode)) ?? .iconOnly
         self.menuBarMode = decodedMenuBarMode == .localTime ? .iconOnly : decodedMenuBarMode
         self.menuBarIcon = try container.decodeIfPresent(MenuBarIcon.self, forKey: .menuBarIcon) ?? .globe

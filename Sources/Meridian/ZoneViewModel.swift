@@ -12,6 +12,12 @@ final class ZoneViewModel: ObservableObject {
         }
     }
 
+    @Published var tags: [ZoneTag] {
+        didSet {
+            save()
+        }
+    }
+
     @Published var sliderMinutes: Double = 0
 
     @Published var menuBarMode: MenuBarMode {
@@ -101,6 +107,7 @@ final class ZoneViewModel: ObservableObject {
             let payload = try? ZonePreferencesCoding.decode(data)
         {
             self.entries = payload.entries
+            self.tags = payload.tags
             self.menuBarMode = payload.menuBarMode
             self.menuBarIcon = payload.menuBarIcon
             self.showMenuBarZoneFlag = payload.showMenuBarZoneFlag
@@ -112,6 +119,7 @@ final class ZoneViewModel: ObservableObject {
             self.showUTCOffset = payload.showUTCOffset
         } else {
             self.entries = DefaultZones.entries
+            self.tags = []
             self.menuBarMode = .iconOnly
             self.menuBarIcon = .globe
             self.showMenuBarZoneFlag = false
@@ -214,7 +222,8 @@ final class ZoneViewModel: ObservableObject {
 
     var popoverHeight: CGFloat {
         let rowHeight = CGFloat(max(visiblePopoverRowCount, 1)) * 79
-        return min(max(rowHeight + 145, 316), 640)
+        let taggedRowHeight = CGFloat(visibleEntries.filter { !$0.tagIDs.isEmpty }.count) * 20
+        return min(max(rowHeight + taggedRowHeight + 145, 316), 660)
     }
 
     var timeSortTitle: String {
@@ -252,6 +261,73 @@ final class ZoneViewModel: ObservableObject {
             referenceTimeZone: configuredLocalTimeZone,
             timeFormat: timeFormat
         )
+    }
+
+    func tags(for entry: TimeZoneEntry) -> [ZoneTag] {
+        entry.tagIDs.compactMap { tagID in
+            tags.first { $0.id == tagID }
+        }
+    }
+
+    func isTag(_ tag: ZoneTag, assignedTo entry: TimeZoneEntry) -> Bool {
+        entry.tagIDs.contains(tag.id)
+    }
+
+    func addTag(name: String, colorHex: String) -> ZoneTag? {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            return nil
+        }
+
+        let tag = ZoneTag(name: uniqueTagName(trimmedName), colorHex: colorHex)
+        tags.append(tag)
+        return tag
+    }
+
+    func updateTag(_ tag: ZoneTag, name: String, colorHex: String) {
+        guard let index = tags.firstIndex(where: { $0.id == tag.id }) else {
+            return
+        }
+
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmedName.isEmpty {
+            tags[index].name = uniqueTagName(trimmedName, excluding: tag.id)
+        }
+        tags[index].colorHex = colorHex
+    }
+
+    func removeTag(_ tag: ZoneTag) {
+        tags.removeAll { $0.id == tag.id }
+        for index in entries.indices {
+            entries[index].tagIDs.removeAll { $0 == tag.id }
+        }
+    }
+
+    func toggleTag(_ tag: ZoneTag, for entry: TimeZoneEntry) {
+        guard let entryIndex = entries.firstIndex(where: { $0.id == entry.id }) else {
+            return
+        }
+
+        if entries[entryIndex].tagIDs.contains(tag.id) {
+            entries[entryIndex].tagIDs.removeAll { $0 == tag.id }
+        } else {
+            entries[entryIndex].tagIDs.append(tag.id)
+        }
+    }
+
+    private func uniqueTagName(_ name: String, excluding excludedID: UUID? = nil) -> String {
+        let existingNames = Set(tags
+            .filter { $0.id != excludedID }
+            .map { $0.name.lowercased() })
+        guard existingNames.contains(name.lowercased()) else {
+            return name
+        }
+
+        var counter = 2
+        while existingNames.contains("\(name) \(counter)".lowercased()) {
+            counter += 1
+        }
+        return "\(name) \(counter)"
     }
 
     func entryName(_ entry: TimeZoneEntry) -> String {
@@ -449,6 +525,7 @@ final class ZoneViewModel: ObservableObject {
     private func save() {
         let payload = ZonePreferencesPayload(
             entries: entries,
+            tags: tags,
             menuBarMode: menuBarMode,
             menuBarIcon: menuBarIcon,
             showMenuBarZoneFlag: showMenuBarZoneFlag,
