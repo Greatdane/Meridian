@@ -12,7 +12,9 @@ The core product goal is a small, fast, low-friction alternative to heavier worl
 - `Sources/MeridianCore`: Pure Foundation domain code for time-zone entries, catalog loading/search, preference payloads, display formatting, UTC offsets, and name abbreviation.
 - `Sources/MeridianChecks`: Lightweight executable checks used as the project test suite.
 - `packaging/Info.plist`: App bundle metadata for the packaged `.app`.
+- `Resources/Meridian.icns`: App icon copied into the packaged `.app`.
 - `scripts/build_app.sh`: Builds the Swift package executable, creates `dist/Meridian.app`, copies the `Info.plist`, and signs ad hoc for local use.
+- `scripts/generate_icon.swift`: Regenerates the app icon from deterministic AppKit drawing code.
 
 ## Build And Test
 

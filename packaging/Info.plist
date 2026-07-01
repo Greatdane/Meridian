@@ -6,6 +6,8 @@
     <string>en</string>
     <key>CFBundleExecutable</key>
     <string>Meridian</string>
+    <key>CFBundleIconFile</key>
+    <string>Meridian</string>
     <key>CFBundleIdentifier</key>
     <string>local.meridian.app</string>
     <key>CFBundleInfoDictionaryVersion</key>

@@ -100,6 +100,7 @@ open -n dist/Meridian.app
 Sources/Meridian        AppKit + SwiftUI app target
 Sources/MeridianCore    Time-zone catalog, formatting, preferences, helpers
 Sources/MeridianChecks  Lightweight executable checks
+Resources/Meridian.icns  macOS app icon
 packaging/Info.plist    macOS app bundle metadata
 scripts/build_app.sh    Local app bundle build script
 ```
@@ -116,6 +117,12 @@ make run
 ```
 
 `MeridianChecks` covers catalog parsing, search, formatting, preference compatibility, time snapping, menu bar defaults, and abbreviation behavior.
+
+Regenerate the app icon after changing `scripts/generate_icon.swift`:
+
+```sh
+swift scripts/generate_icon.swift
+```
 
 ## Notes
 

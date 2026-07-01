@@ -1,6 +1,7 @@
 .DS_Store
 .build/
 dist/
+Resources/Meridian.iconset/
 *.xcodeproj/
 *.xcworkspace/
 xcuserdata/

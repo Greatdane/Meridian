@@ -7,6 +7,7 @@ APP_NAME="Meridian"
 APP_DIR="$ROOT_DIR/dist/$APP_NAME.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
+RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
 cd "$ROOT_DIR"
 
@@ -19,9 +20,12 @@ else
 fi
 
 rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR"
+mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
 cp "$BIN_DIR/$APP_NAME" "$MACOS_DIR/$APP_NAME"
 cp "$ROOT_DIR/packaging/Info.plist" "$CONTENTS_DIR/Info.plist"
+if [[ -f "$ROOT_DIR/Resources/Meridian.icns" ]]; then
+    cp "$ROOT_DIR/Resources/Meridian.icns" "$RESOURCES_DIR/Meridian.icns"
+fi
 chmod +x "$MACOS_DIR/$APP_NAME"
 
 if command -v codesign >/dev/null 2>&1; then
